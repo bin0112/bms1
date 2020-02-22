@@ -45,6 +45,7 @@
 
                                 </td>
                                 <td>
+                                    <button pk="{{ book.pk }}"  class="btn btn-danger btn-sm delbtn">Ajax删除</button>
                                     <a href="/books/delete/{{ book.pk }}" class="btn btn-danger btn-sm">删除</a>
                                     <a href="/books/edit/{{ book.pk }}" class="btn btn-warning btn-sm">编辑</a>
                                 </td>
@@ -56,6 +57,36 @@
         </div>
     </div>
 
+{% csrf_token %}
+<script src="/static/admin/js/vendor/jquery/jquery.js"></script>
+<script>
+
+    $('h3')
+
+    // 为删除按钮绑定事件
+    $('.delbtn').click(function () {
+        var pk=$(this).attr("pk");
+        var ele = $(this).parent().parent();  // 获取当前点击事件的父父标签，备后面使用，因为后续会有Ajax调用$(this)不能用
+        //发送删除书籍的请求
+        $.ajax({
+            url:"/books/ajax_delete/"+pk+"/",  // 可能会出现重定向错误，因为和url.py中的路径不匹配导致的错误，所以要加'/'
+            type:"post",
+            data:{
+                csrfmiddlewaretoken:$("[name='csrfmiddlewaretoken']").val()
+            },
+            success:function (response) {
+                console.log(response);
+                var obj=JSON.parse(response);
+                if (obj.state){
+                    ele.remove()
+                }
+
+            }
+
+        })
+    })
+
+</script>
 
 
 

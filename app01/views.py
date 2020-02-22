@@ -5,6 +5,7 @@ from django.shortcuts import render,HttpResponse,redirect
 
 from app01.models import Book,Publish,Author,AuthorDetail,Emp
 # Create your views here.
+import json
 
 
 def addrecode(request):
@@ -315,14 +316,60 @@ def query2(request):
     # ret = Author.objects.annotate(max_price=Max('book__price')).values('name','max_price')
 
     # 查询作者数不止一个的书籍名称及作者个数
-    ret = Book.objects.annotate(c=Count("authors")).filter(c__gt=1).values('title','c')
+    # ret = Book.objects.annotate(c=Count("authors")).filter(c__gt=1).values('title','c')
+
+    # print(ret)
+
+
+    ############ F 与 Q #########################
+    from django.db.models import F,Q
+
+    # F 函数是获取栏位值
+
+    # 查询评论数大于100的所有书籍名称
+
+    # ret = Book.objects.filter(comment_count__gt=100).values('title')
+
+    # 查询评论数大于点赞数的所有书籍名称
+
+    # ret = Book.objects.filter(comment_count__gt=F('poll_count')).values('title')
+
+    # 查询评论数大于两倍点赞数的所有书籍名称
+
+    # ret = Book.objects.filter(comment_count__gt=F('poll_count')*2).values('title')
+
+    # 给每一本书籍的价格提高100
+
+    # ret = Book.objects.all().update(price=100+F('price'))
+
+    # print(ret)
+
+
+    # Q 函数 : 条件合并，并增加查询条件 与、或、非
+
+
+    # 且是直接在filter中加逗号就好
+    # 查询书本价格大于300且评论数大于2000的书籍
+    # ret = Book.objects.filter(price__gt=300,comment_count__gt=2000)
+
+    # 查询书本价格大于300或者评论数大于2000的书籍
+
+    # 与 &      或 |     非 ~
+    # ret = Book.objects.filter(Q(price__gt=300)|~Q(comment_count__gt=3000))
+
+
+    ret = Book.objects.filter(Q(Q(price__gt=300) | Q(comment_count__gt=2000))&~Q(poll_count__gt=2000))
+
 
     print(ret)
 
-
-
-
-
     return HttpResponse("查询成功")
 
+def book_ajax_del(request,del_book_id):
+    response = {"state": True}
+    try:
+        Book.objects.filter(pk=del_book_id).delete()
+    except Exception as e:
+        response = {"state": False}
 
+    return HttpResponse(json.dumps(response))

@@ -10,6 +10,8 @@ class Book(models.Model):
     title = models.CharField(max_length=32)
     price = models.DecimalField(max_digits=8,decimal_places=2)
     pub_date = models.DateTimeField() #"2012-12-12"
+    comment_count=models.IntegerField(default=100)
+    poll_count=models.IntegerField(default=100)
     publish = models.ForeignKey(to='Publish',on_delete=models.CASCADE,null=True)  # 级联删除 设置外键时可以增加null=True，可以默认此字段为空
     authors = models.ManyToManyField(to='Author') #多对多自行创建一张表的语句
 
